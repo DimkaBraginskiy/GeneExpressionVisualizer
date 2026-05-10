@@ -6,8 +6,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-
-
 def unpack(file: str):
     unpacked = file.replace('.gz', '')
     if not os.path.exists(unpacked):
@@ -76,19 +74,23 @@ def identify_top_genes(df_long: pd.DataFrame):
 
 
 def visualize_data(df_long, top_genes_list):
+    folder = "Visualizations"
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
     df_plot = df_long[df_long['gene'].isin(top_genes_list)].copy()
     df_plot['gene'] = pd.Categorical(df_plot['gene'], categories=top_genes_list, ordered=True)
 
     plt.figure(figsize=(12, 6))
     sns.boxplot(data=df_plot, x='gene', y='expression', hue='group')
     plt.xticks(rotation=45)
-    plt.savefig('boxplot_top10_genes.png')
+    plt.savefig(os.path.join(folder, 'boxplot_top10_genes.png'))
     plt.close()
 
     plt.figure(figsize=(12, 6))
     sns.violinplot(data=df_plot, x='gene', y='expression', hue='group', split=True, inner="quart")
     plt.xticks(rotation=45)
-    plt.savefig('violinplot_top10_genes.png')
+    plt.savefig(os.path.join(folder, 'violinplot_top10_genes.png'))
     plt.close()
 
     heatmap_data = df_plot.pivot_table(index='gene', columns='sample', values='expression')
@@ -96,7 +98,7 @@ def visualize_data(df_long, top_genes_list):
     heatmap_data = heatmap_data[[c for c in cols if c in heatmap_data.columns]]
     plt.figure(figsize=(10, 8))
     sns.heatmap(heatmap_data, annot=True, cmap='RdYlBu_r', fmt=".1f")
-    plt.savefig('heatmap_top10_genes.png')
+    plt.savefig(os.path.join(folder, 'heatmap_top10_genes.png'))
     plt.close()
 
 
